@@ -9,6 +9,7 @@ import Profile from './pages/Profile'
 import History from './pages/History'
 import Record from './pages/Record'
 import Receivables from './pages/Receivables'
+import Expenses from './pages/Expenses'
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
     <Route path="history" element={<History/>} />
     <Route path="record" element={<Record/>} />
     <Route path="receivables" element={<Receivables/>} />
+    <Route path='expenses' element={<Expenses/>}/>
   </Route>
 
 </Routes>

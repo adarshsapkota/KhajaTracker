@@ -64,6 +64,11 @@ function NavBar() {
               Profile
             </NavLink>
           </li>
+          <li>
+            <NavLink to="/dashboard/expenses" className={getClassName}>
+              Expenses
+            </NavLink>
+          </li>
         </ul>
         <button type="button" className="secondary-btn" onClick={handleLogout}>
           Logout

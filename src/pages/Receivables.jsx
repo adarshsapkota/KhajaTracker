@@ -7,13 +7,27 @@ import {
 } from "../helper/lunchUtils";
 
 function Receivables() {
-  const { records, payments, addPayment, clearPayments, clearRecords } = useLunchApp();
+  const {
+    groups,
+    selectedGroupId,
+    selectGroup,
+    records,
+    payments,
+    addPayment,
+    settleGroupPayments,
+    deletePayment,
+    clearPayments,
+    clearRecords,
+  } = useLunchApp();
   const receivables = getReceivablesByMember(records, payments);
+  const [collectionMode, setCollectionMode] = useState("individual");
   const [date, setDate] = useState(getTodayDateString());
   const [memberId, setMemberId] = useState("");
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
   const [message, setMessage] = useState("");
+  const selectedMemberPending =
+    receivables.members.find((member) => member.id === memberId)?.amount || 0;
 
   useEffect(() => {
     if (!receivables.members.length) {
@@ -37,16 +51,26 @@ function Receivables() {
 
   const handleRecordPayment = (event) => {
     event.preventDefault();
-    const result = addPayment({
-      date,
-      memberId,
-      amount,
-      note,
-    });
-    setMessage(result.message || (result.ok ? "Payment recorded" : ""));
+    const result =
+      collectionMode === "group"
+        ? settleGroupPayments({ date, note })
+        : addPayment({
+            date,
+            memberId,
+            amount,
+            note,
+          });
+    setMessage(result.message || "");
     if (!result.ok) return;
     setAmount("");
     setNote("");
+  };
+
+  const handleDeletePayment = (paymentId) => {
+    const confirmed = window.confirm("Delete this payment entry?");
+    if (!confirmed) return;
+    const result = deletePayment(paymentId);
+    setMessage(result.message || "");
   };
 
   const handleClearPaymentHistory = () => {
@@ -64,6 +88,28 @@ function Receivables() {
           member still owes you.
         </p>
       </div>
+
+      {!groups.length ? (
+        <section className="card">
+          <p className="empty-state">No groups found. Create a group in Profile first.</p>
+        </section>
+      ) : (
+        <section className="card">
+          <label>
+            Group
+            <select
+              value={selectedGroupId || ""}
+              onChange={(e) => selectGroup(e.target.value)}
+            >
+              {groups.map((group) => (
+                <option key={group.id} value={group.id}>
+                  {group.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        </section>
+      )}
 
       <div className="stats-grid">
         <div className="card stat-card">
@@ -104,31 +150,54 @@ function Receivables() {
         <form className="form-grid" onSubmit={handleRecordPayment}>
           {message ? <p className="form-message">{message}</p> : null}
           <label>
-            Date
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-          </label>
-          <label>
-            Member
-            <select value={memberId} onChange={(e) => setMemberId(e.target.value)}>
-              <option value="">Select member</option>
-              {receivables.members.map((member) => (
-                <option key={member.id} value={member.id}>
-                  {member.name} ({formatCurrency(member.amount)} pending)
-                </option>
-              ))}
+            Collect by
+            <select
+              value={collectionMode}
+              onChange={(e) => setCollectionMode(e.target.value)}
+            >
+              <option value="individual">Individual</option>
+              <option value="group">Group (settle all)</option>
             </select>
           </label>
           <label>
-            Amount received
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="0.00"
-            />
+            Date
+            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
           </label>
+
+          {collectionMode === "individual" ? (
+            <>
+              <label>
+                Member
+                <select value={memberId} onChange={(e) => setMemberId(e.target.value)}>
+                  <option value="">Select member</option>
+                  {receivables.members.map((member) => (
+                    <option key={member.id} value={member.id}>
+                      {member.name} ({formatCurrency(member.amount)} pending)
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Amount received
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  max={selectedMemberPending > 0 ? selectedMemberPending : undefined}
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="0.00"
+                />
+              </label>
+              <p className="muted">
+                Pending for selected member: {formatCurrency(selectedMemberPending)}
+              </p>
+            </>
+          ) : (
+            <p className="muted">
+              Group pending total to settle now: {formatCurrency(receivables.total)}
+            </p>
+          )}
           <label className="full-width">
             Note (optional)
             <input
@@ -139,7 +208,7 @@ function Receivables() {
             />
           </label>
           <button type="submit" className="primary-btn" disabled={!receivables.members.length}>
-            Save Received Amount
+            {collectionMode === "group" ? "Settle Group Dues" : "Save Received Amount"}
           </button>
         </form>
       </section>
@@ -185,7 +254,16 @@ function Receivables() {
                   <p className="muted">{payment.date}</p>
                   {payment.note ? <p className="muted">{payment.note}</p> : null}
                 </div>
-                <strong className="amount-positive">{formatCurrency(payment.amount)}</strong>
+                <div>
+                  <strong className="amount-positive">{formatCurrency(payment.amount)}</strong>
+                  <button
+                    type="button"
+                    className="secondary-btn"
+                    onClick={() => handleDeletePayment(payment.id)}
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             ))}
           </div>

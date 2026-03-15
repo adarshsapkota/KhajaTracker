@@ -1,3 +1,7 @@
+export function roundMoney(value) {
+  return Number((Number(value) || 0).toFixed(2));
+}
+
 export function formatCurrency(value) {
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
@@ -25,7 +29,7 @@ export function formatDate(value) {
 export function getPerHead(record) {
   const count = record?.participantIds?.length || 0;
   if (!count) return 0;
-  return (Number(record.total) || 0) / count;
+  return roundMoney((Number(record.total) || 0) / count);
 }
 
 export function getParticipantShareEntries(record) {
@@ -49,7 +53,7 @@ export function getParticipantShareEntries(record) {
     return {
       id,
       name,
-      amount: Number(amount.toFixed(2)),
+      amount: roundMoney(amount),
     };
   });
 }
@@ -85,7 +89,7 @@ export function getBalances(records) {
   });
 
   return Object.values(balances)
-    .map((entry) => ({ ...entry, amount: Number(entry.amount.toFixed(2)) }))
+    .map((entry) => ({ ...entry, amount: roundMoney(entry.amount) }))
     .sort((a, b) => b.amount - a.amount);
 }
 
@@ -119,19 +123,17 @@ export function getDashboardStats(records) {
   );
 
   return {
-    todayTotal: Number(todayTotal.toFixed(2)),
+    todayTotal: roundMoney(todayTotal),
     todayCount,
-    monthTotal: Number(monthTotal.toFixed(2)),
-    grandTotal: Number(grandTotal.toFixed(2)),
+    monthTotal: roundMoney(monthTotal),
+    grandTotal: roundMoney(grandTotal),
   };
 }
 
 export function getShareTotal(participantShares, participantIds) {
   if (!participantShares || !Array.isArray(participantIds)) return 0;
-  return Number(
-    participantIds
-      .reduce((sum, id) => sum + (Number(participantShares[id]) || 0), 0)
-      .toFixed(2)
+  return roundMoney(
+    participantIds.reduce((sum, id) => sum + (Number(participantShares[id]) || 0), 0)
   );
 }
 
@@ -174,17 +176,15 @@ export function getReceivablesByMember(records, payments = []) {
       const pending = Math.max(0, item.amount - received);
       return {
         ...item,
-        grossAmount: Number(item.amount.toFixed(2)),
-        receivedAmount: Number(received.toFixed(2)),
-        amount: Number(pending.toFixed(2)),
+        grossAmount: roundMoney(item.amount),
+        receivedAmount: roundMoney(received),
+        amount: roundMoney(pending),
       };
     })
     .filter((item) => item.amount > 0)
     .sort((a, b) => b.amount - a.amount);
 
-  const total = Number(
-    members.reduce((sum, item) => sum + item.amount, 0).toFixed(2)
-  );
+  const total = roundMoney(members.reduce((sum, item) => sum + item.amount, 0));
 
   return { members, total };
 }
