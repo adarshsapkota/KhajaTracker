@@ -4,6 +4,7 @@ import {
   getCategories,
   updateExpense,
 } from "../helper/expenseUtils";
+
 const initialFormData = {
   description: "",
   amount: "",
@@ -11,17 +12,21 @@ const initialFormData = {
   category_id: "",
   tags: "",
 };
-function ExpenseForm({ onExpenseAdded, editingExpense, onExpenseUpdated }) {
+
+function ExpenseForm({
+  onExpenseAdded,
+  editingExpense,
+  onExpenseUpdated,
+  onCancelEdit,
+}) {
   const [categories, setCategories] = useState([]);
   const [formData, setFormData] = useState(initialFormData);
   const [loading, setLoading] = useState(true);
 
-  //Fetching categories
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const data = await getCategories();
-        console.log("Fetched categories:", data);
         setCategories(data);
       } catch (error) {
         console.error("Failed to fetch categories", error);
@@ -32,7 +37,6 @@ function ExpenseForm({ onExpenseAdded, editingExpense, onExpenseUpdated }) {
     fetchCategories();
   }, []);
 
-  //Updating expense
   useEffect(() => {
     if (editingExpense) {
       try {
@@ -44,18 +48,17 @@ function ExpenseForm({ onExpenseAdded, editingExpense, onExpenseUpdated }) {
           tags: editingExpense.tags.join(", "),
         });
       } catch (error) {
-        console.log("Error updating expense", error);
+        console.log("Error setting form data", error);
       }
+    } else {
+      setFormData(initialFormData);
     }
   }, [editingExpense]);
 
-  if (loading) return <div>Loading .....</div>;
-  // if (categories.length === 0) return <div>No categories available</div>;
+  if (loading) return <div>Loading.....</div>;
 
-  //Submit Expense
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (editingExpense) {
       try {
         const data = await updateExpense(editingExpense.id, {
@@ -63,7 +66,6 @@ function ExpenseForm({ onExpenseAdded, editingExpense, onExpenseUpdated }) {
           tags: formData.tags.split(",").map((tag) => tag.trim()),
         });
         onExpenseUpdated(data);
-        console.log("Expense Updated: ");
       } catch (error) {
         console.error("Error updating expense", error);
       }
@@ -73,7 +75,6 @@ function ExpenseForm({ onExpenseAdded, editingExpense, onExpenseUpdated }) {
           ...formData,
           tags: formData.tags.split(",").map((tag) => tag.trim()),
         });
-        console.log("Expense added:", data);
         onExpenseAdded(data);
         setFormData(initialFormData);
       } catch (error) {
@@ -82,41 +83,55 @@ function ExpenseForm({ onExpenseAdded, editingExpense, onExpenseUpdated }) {
     }
   };
 
-  //styles
-  const inputboxstyle = {
-    margin: "10px",
-    width: "50%",
-    height: "30px",
-    border: "1px solid #ccc",
-    borderRadius: 10,
-    textAlign: "center",
+  const inputStyle = {
+    display: "block",
+    margin: "8px auto",
+    width: "80%",
+    height: "38px",
+    border: "1px solid #e0e0e0",
+    borderRadius: "8px",
+    padding: "0 12px",
+    fontSize: "14px",
+    color: "#333",
+    backgroundColor: "#fafafa",
+    boxSizing: "border-box",
   };
+
   return (
     <div
       style={{
         backgroundColor: "white",
-        border: "1px solid white",
-        borderRadius: "15px",
-        margin: "4px",
-        padding: "10px",
+        borderRadius: "12px",
+        padding: "24px 32px",
+        width: "480px",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
       }}
     >
       <form onSubmit={handleSubmit}>
-        <h1>Add Your Expense</h1>
+        <h1
+          style={{
+            textAlign: "center",
+            fontSize: "18px",
+            marginBottom: "16px",
+            color: "#333",
+            fontWeight: "600",
+          }}
+        >
+          {editingExpense ? "Edit Expense" : "Add Expense"}
+        </h1>
         <input
           name="description"
           placeholder="Enter Description"
-          style={inputboxstyle}
+          style={inputStyle}
           value={formData.description}
           onChange={(e) =>
             setFormData({ ...formData, [e.target.name]: e.target.value })
           }
         />
-
         <input
           name="amount"
-          placeholder="Enter Expense Amount"
-          style={inputboxstyle}
+          placeholder="Enter Amount"
+          style={inputStyle}
           value={formData.amount}
           onChange={(e) =>
             setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -125,8 +140,7 @@ function ExpenseForm({ onExpenseAdded, editingExpense, onExpenseUpdated }) {
         <input
           type="date"
           name="date"
-          placehodler="Select Date"
-          style={inputboxstyle}
+          style={inputStyle}
           value={formData.date}
           onChange={(e) =>
             setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -134,7 +148,7 @@ function ExpenseForm({ onExpenseAdded, editingExpense, onExpenseUpdated }) {
         />
         <select
           name="category_id"
-          style={inputboxstyle}
+          style={inputStyle}
           value={formData.category_id}
           onChange={(e) =>
             setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -150,16 +164,54 @@ function ExpenseForm({ onExpenseAdded, editingExpense, onExpenseUpdated }) {
         <input
           type="text"
           name="tags"
-          style={inputboxstyle}
+          style={inputStyle}
           value={formData.tags}
           placeholder="Enter tags separated by commas"
           onChange={(e) =>
             setFormData({ ...formData, [e.target.name]: e.target.value })
           }
         />
-        <button type="submit" className="primary-btn">
-          {editingExpense ? "Edit Expense" : "Add Expense"}
+        <button
+          type="submit"
+          style={{
+            display: "block",
+            margin: "16px auto 0",
+            width: "85%",
+            height: "40px",
+            backgroundColor: "#333",
+            color: "white",
+            border: "none",
+            borderRadius: "8px",
+            fontSize: "14px",
+            cursor: "pointer",
+            fontWeight: "600",
+            boxSizing: "border-box",
+          }}
+        >
+          {editingExpense ? "Update Expense" : "Add Expense"}
         </button>
+        {editingExpense && (
+          <button
+            type="button"
+            onClick={onCancelEdit}
+            style={{
+              display: "block",
+              margin: "8px auto 0",
+              width: "85%",
+              height: "40px",
+              backgroundColor: "white",
+              color: "#333",
+              border: "1px solid #e0e0e0",
+              borderRadius: "8px",
+              fontSize: "14px",
+              cursor: "pointer",
+              fontWeight: "600",
+              boxSizing: "border-box",
+            }}
+          >
+            Cancel
+          </button>
+        )}
       </form>
     </div>
   );
