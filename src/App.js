@@ -10,6 +10,7 @@ import History from './pages/History'
 import Record from './pages/Record'
 import Receivables from './pages/Receivables'
 import Expenses from './pages/Expenses'
+import ExpenseAnalytics from './pages/ExpenseAnalytics'
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
     <Route path="record" element={<Record/>} />
     <Route path="receivables" element={<Receivables/>} />
     <Route path='expenses' element={<Expenses/>}/>
+    <Route path='expensesanalytics' element = {<ExpenseAnalytics />} />
   </Route>
 
 </Routes>

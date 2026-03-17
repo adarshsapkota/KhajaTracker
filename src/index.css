@@ -20,6 +20,7 @@ select,
 textarea,
 button {
   font: inherit;
+  margin: 2px;
 }
 
 .app-shell {

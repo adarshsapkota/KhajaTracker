@@ -1,9 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  addExpense,
-  getCategories,
-  updateExpense,
-} from "../helper/expenseUtils";
+import { addExpense, getCategories, updateExpense } from "../helper/expenseUtils";
 
 const initialFormData = {
   description: "",
@@ -13,12 +9,7 @@ const initialFormData = {
   tags: "",
 };
 
-function ExpenseForm({
-  onExpenseAdded,
-  editingExpense,
-  onExpenseUpdated,
-  onCancelEdit,
-}) {
+function ExpenseForm({ onExpenseAdded, editingExpense, onExpenseUpdated, onCancelEdit }) {
   const [categories, setCategories] = useState([]);
   const [formData, setFormData] = useState(initialFormData);
   const [loading, setLoading] = useState(true);
@@ -55,7 +46,7 @@ function ExpenseForm({
     }
   }, [editingExpense]);
 
-  if (loading) return <div>Loading.....</div>;
+  if (loading) return <div style={{ padding: "16px" }}>Loading.....</div>;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -86,8 +77,8 @@ function ExpenseForm({
   const inputStyle = {
     display: "block",
     margin: "8px auto",
-    width: "80%",
-    height: "38px",
+    width: "100%",
+    height: "40px",
     border: "1px solid #e0e0e0",
     borderRadius: "8px",
     padding: "0 12px",
@@ -98,61 +89,53 @@ function ExpenseForm({
   };
 
   return (
-    <div
-      style={{
-        backgroundColor: "white",
-        borderRadius: "12px",
-        padding: "24px 32px",
-        width: "480px",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-      }}
-    >
+    <div style={{
+      backgroundColor: "white",
+      borderRadius: "12px",
+      padding: "20px",
+      width: "100%",
+      maxWidth: "480px",   // caps width on desktop
+      boxSizing: "border-box",
+      boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+    }}>
       <form onSubmit={handleSubmit}>
-        <h1
-          style={{
-            textAlign: "center",
-            fontSize: "18px",
-            marginBottom: "16px",
-            color: "#333",
-            fontWeight: "600",
-          }}
-        >
+        <h1 style={{
+          textAlign: "center",
+          fontSize: "16px",
+          marginBottom: "16px",
+          color: "#333",
+          fontWeight: "600",
+          margin: "0 0 16px 0",
+        }}>
           {editingExpense ? "Edit Expense" : "Add Expense"}
         </h1>
+
         <input
           name="description"
           placeholder="Enter Description"
           style={inputStyle}
           value={formData.description}
-          onChange={(e) =>
-            setFormData({ ...formData, [e.target.name]: e.target.value })
-          }
+          onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
         />
         <input
           name="amount"
           placeholder="Enter Amount"
           style={inputStyle}
           value={formData.amount}
-          onChange={(e) =>
-            setFormData({ ...formData, [e.target.name]: e.target.value })
-          }
+          onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
         />
         <input
           type="date"
           name="date"
           style={inputStyle}
           value={formData.date}
-          onChange={(e) =>
-            setFormData({ ...formData, [e.target.name]: e.target.value })
-          }
+          onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
         />
         <select
           name="category_id"
           style={inputStyle}
           value={formData.category_id}
-          onChange={(e) =>
-            setFormData({ ...formData, [e.target.name]: e.target.value })
-          }
+          onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
         >
           <option value="">Select Category</option>
           {categories.map((category) => (
@@ -167,17 +150,16 @@ function ExpenseForm({
           style={inputStyle}
           value={formData.tags}
           placeholder="Enter tags separated by commas"
-          onChange={(e) =>
-            setFormData({ ...formData, [e.target.name]: e.target.value })
-          }
+          onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
         />
+
         <button
           type="submit"
           style={{
             display: "block",
-            margin: "16px auto 0",
-            width: "85%",
-            height: "40px",
+            margin: "16px 0 0",
+            width: "100%",
+            height: "42px",
             backgroundColor: "#333",
             color: "white",
             border: "none",
@@ -190,15 +172,16 @@ function ExpenseForm({
         >
           {editingExpense ? "Update Expense" : "Add Expense"}
         </button>
+
         {editingExpense && (
           <button
             type="button"
             onClick={onCancelEdit}
             style={{
               display: "block",
-              margin: "8px auto 0",
-              width: "85%",
-              height: "40px",
+              margin: "8px 0 0",
+              width: "100%",
+              height: "42px",
               backgroundColor: "white",
               color: "#333",
               border: "1px solid #e0e0e0",
